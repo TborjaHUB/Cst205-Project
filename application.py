@@ -1,10 +1,10 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QVBoxLayout,
-    QFileDialog, QScrollArea
+    QFileDialog, QScrollArea, QLineEdit, QComboBox
 )
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Slot
 from pathlib import Path
 from PIL import Image
 from PIL.ImageQt import ImageQt
@@ -15,7 +15,7 @@ class Home(QWidget):
         self.setWindowTitle("Dollar Store Photoshop")
         self.resize(900, 600)
 
-        self.image = None  
+        self.image = None
 
         self.info = QLabel("WELCOME TO DOLLAR STORE PHOTOSHOP :)")
         self.info.setAlignment(Qt.AlignCenter)
@@ -41,10 +41,28 @@ class Home(QWidget):
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.preview_label)
 
+            # Drop Down Menu Options
+        self.drop_label = QLabel("Image Manipulation")
+        self.drop_down_list = ["Choose an option", "Size Up", "Shrink", "Crop"]
+        self.drop_combo_box = QComboBox()
+        self.drop_combo_box.addItems(self.drop_down_list)
+
+        self.drop_btn = QPushButton("Submit")
+
+
+        v_drop_box = QVBoxLayout()
+        v_drop_box.addWidget(self.drop_label)
+        v_drop_box.addWidget(self.drop_combo_box)
+        v_drop_box.addWidget(self.drop_btn)
+        v_drop_box.setAlignment(Qt.AlignLeft)
+
+
         v = QVBoxLayout()
         v.addWidget(self.info)
         v.addWidget(self.open_btn)
+        v.addLayout(v_drop_box)
         v.addWidget(self.scroll)
+
         self.setLayout(v)
 
     def open_image(self):
@@ -53,7 +71,7 @@ class Home(QWidget):
         )
         if not path:
             return
-        
+
         img = Image.open(path).convert("RGBA")
         self.image = img
 
