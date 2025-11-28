@@ -1,9 +1,11 @@
 import sys
+import numpy as np
+import cv2
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QVBoxLayout,
     QFileDialog, QScrollArea
 )
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtCore import Qt
 from pathlib import Path
 from PIL import Image
@@ -54,10 +56,13 @@ class Home(QWidget):
         if not path:
             return
         
-        img = Image.open(path).convert("RGBA")
-        self.image = img
+        img = cv2.imread(path)
+        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb.shape
+        bytes_per_line = ch * w
+        self.image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
 
-        qimg = ImageQt(img)
+        qimg = self.image
         self.preview_label.setPixmap(QPixmap.fromImage(qimg))
         self.preview_label.setVisible(True)
         self.info.setText("Loaded it brah")
