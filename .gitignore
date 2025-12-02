@@ -78,3 +78,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
