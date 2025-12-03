@@ -119,8 +119,6 @@ if __name__ == "__main__":
 
 
 
-
-
 def bgrtorgb(img):
     new_img = cv2.imread(img)
     rgb = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
