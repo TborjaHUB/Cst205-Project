@@ -99,8 +99,8 @@ class Home(QWidget):
             bone_bgr = cv2.applyColorMap(gray, cv2.COLORMAP_BONE)
             img = cv2.cvtColor(bone_bgr, cv2.COLOR_BGR2RGB)
 
-        self.cv_img = img  
-        self.show_image(self.cv_img)
+        self.img = img  
+        self.show_image(self.img)
         self.info.setText(f"Applied: {option}")
 
 
@@ -116,23 +116,3 @@ if __name__ == "__main__":
     win = Home()
     win.show()
     sys.exit(app.exec())
-
-
-
-
-
-def bgrtorgb(img):
-    new_img = cv2.imread(img)
-    rgb = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
-    h, w, ch = rgb.shape
-    bytes_per_line = ch * w
-    image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
-    return image
-
-def rgbtobgr(img):
-    new_img = cv2.imread(img)
-    rgb = cv2.cvtColor(new_img, cv2.COLOR_RGBTOBGR)
-    h, w, ch = rgb.shape
-    bytes_per_line = ch * w
-    image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
-    return image
