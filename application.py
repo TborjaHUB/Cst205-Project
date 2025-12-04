@@ -16,6 +16,8 @@ from PIL.ImageQt import ImageQt
 
 from unsplash_api import UnsplashAPI
 
+from functions import to_bone_color, to_shrink, to_size_up
+
 
 class Home(QWidget):
     def __init__(self):
@@ -24,7 +26,7 @@ class Home(QWidget):
         self.resize(900, 600)
 
         self.img = None
-        self.unsplash = UnsplashAPI()  
+        self.unsplash = UnsplashAPI()
 
         self.info = QLabel("WELCOME TO DOLLAR STORE PHOTOSHOP :)")
         self.info.setAlignment(Qt.AlignCenter)
@@ -58,7 +60,7 @@ class Home(QWidget):
 
         ##THE DROP DOWN MENU
         self.drop_label = QLabel("Image Manipulation")
-        self.drop_down_list = ["Choose an option", "Size Up", "Shrink", "Crop", "Bone Color"]
+        self.drop_down_list = ["Choose an option", "Size Up", "Shrink", "Custom Resize", "Bone Color"]
         self.drop_combo_box = QComboBox()
         self.drop_combo_box.addItems(self.drop_down_list)
 
@@ -150,11 +152,26 @@ class Home(QWidget):
         option = self.drop_combo_box.currentText()
         img = self.img.copy()
 
-        if option == "Bone Color":
-            img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-            bone_bgr = cv2.applyColorMap(gray, cv2.COLORMAP_BONE)
-            img = cv2.cvtColor(bone_bgr, cv2.COLOR_BGR2RGB)
+        match option:
+            case "Bone Color":
+                img = to_bone_color(img)
+            case "Size Up":
+                # print("test")
+                img = to_size_up(img)
+            case "Shrink":
+                print("test")
+                img = to_shrink(img)
+            case "Custom Resize":
+                print("test")
+            case _:
+                # Default no option picked
+                pass
+
+        # if option == "Bone Color":
+        #     img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        #     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+        #     bone_bgr = cv2.applyColorMap(gray, cv2.COLORMAP_BONE)
+        #     img = cv2.cvtColor(bone_bgr, cv2.COLOR_BGR2RGB)
 
         self.cv_img = img
         self.show_image(self.cv_img)
@@ -176,21 +193,3 @@ if __name__ == "__main__":
     win = Home()
     win.show()
     sys.exit(app.exec())
-
-
-def bgrtorgb(img):
-    new_img = cv2.imread(img)
-    rgb = cv2.cvtColor(new_img, cv2.COLOR_BGR2RGB)
-    h, w, ch = rgb.shape
-    bytes_per_line = ch * w
-    image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
-    return image
-
-
-def rgbtobgr(img):
-    new_img = cv2.imread(img)
-    rgb = cv2.cvtColor(new_img, cv2.COLOR_RGB2BGR)
-    h, w, ch = rgb.shape
-    bytes_per_line = ch * w
-    image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
-    return image
