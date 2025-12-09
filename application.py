@@ -150,6 +150,10 @@ class Home(QWidget):
         self.drop_btn = QPushButton("Submit")
         self.drop_btn.clicked.connect(self.manipulate_image)
 
+        # Revert button
+        self.revert_btn = QPushButton("Revert Image")
+        self.revert_btn.clicked.connect(self.revert_image)
+
         # Resize code
         self.resize_btn = QPushButton("Resize…")
         self.resize_btn.clicked.connect(self.open_resize_dialog)
@@ -193,6 +197,7 @@ class Home(QWidget):
         tools_col.addWidget(self.drop_label)
         tools_col.addWidget(self.drop_combo_box)
         tools_col.addWidget(self.drop_btn)
+        tools_col.addWidget(self.revert_btn)
         tools_col.addSpacing(16)
         tools_col.addWidget(QLabel("Size"))
         tools_col.addWidget(self.resize_btn)
@@ -315,6 +320,7 @@ class Home(QWidget):
             return
 
         self.img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        self.orig_img = self.img.copy()
         self.paint_base = self.img.copy()
         self.manual_zoom = False
         self.zoom = 1.0
@@ -354,6 +360,7 @@ class Home(QWidget):
             return
 
         self.img = img_rgb
+        self.orig_img = self.img.copy()
         self.paint_base = self.img.copy()
         self.manual_zoom = False
         self.zoom = 1.0
@@ -389,6 +396,7 @@ class Home(QWidget):
 
         img = self.img.copy()
 
+
         match option:
             case "Bone Color":
                 img = to_bone_color(img)
@@ -399,7 +407,11 @@ class Home(QWidget):
                 # print("test")
                 img = to_sepia(img)
             case _:
-                # Default no option picked
+                # Everything else
+                bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+                new_bgr = cv2.applyColorMap(gray, return_color_map(option))
+                img = cv2.cvtColor(new_bgr, cv2.COLOR_BGR2RGB)
                 pass
 
         self.img = img
@@ -407,6 +419,14 @@ class Home(QWidget):
         self.last_scale = 1.0
         self.show_image(self.img)
         self.status.setText(f"Applied filter: {option}")
+
+    # Revert image
+    def revert_image(self):
+        self.img = self.orig_img
+        self.show_image(self.img)
+        self.status.setText("Reverted to original image")
+
+
 
     #resize image
     def open_resize_dialog(self):
