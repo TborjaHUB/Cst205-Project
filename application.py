@@ -139,7 +139,10 @@ class Home(QWidget):
 
         # FIlters code
         self.drop_label = QLabel("Filters")
-        self.drop_down_list = ["Choose a filter", "Grayscale", "Sepia", "Invert", "Bone"]
+        self.drop_down_list = ["Choose a filter", "Grayscale", "Sepia", "Invert"]
+        for i in opencv_colormaps:
+            self.drop_down_list.append(i)
+            
         self.drop_combo_box = QComboBox()
         self.drop_combo_box.addItems(self.drop_down_list)
 
