@@ -4,6 +4,7 @@ This class is responsible for manipulating the image such as Shrinking, Sizing u
 
 import numpy as np
 import cv2
+from colormaps import opencv_colormaps
 
 def to_bone_color(picture):
     img_bgr = cv2.cvtColor(picture, cv2.COLOR_RGB2BGR)
@@ -11,6 +12,12 @@ def to_bone_color(picture):
     bone_bgr = cv2.applyColorMap(gray, cv2.COLORMAP_BONE)
     img = cv2.cvtColor(bone_bgr, cv2.COLOR_BGR2RGB)
     return img
+
+def return_color_map(map):
+    
+    try:return opencv_colormaps[map]
+
+    except: return
 
 def to_shrink(picture):
     img_bgr = cv2.cvtColor(picture, cv2.COLOR_RGB2BGR)

@@ -1,5 +1,6 @@
 import sys
 from colormaps import opencv_colormaps
+from functions import return_color_map
 import numpy as np
 import cv2
 import requests
@@ -406,11 +407,11 @@ class Home(QWidget):
             sep = np.clip(sep, 0, 255).astype(np.uint8)
             img = cv2.cvtColor(sep, cv2.COLOR_BGR2RGB)
 
-        elif option == "Bone":
+        elif option == self.drop_combo_box.currentText():
             bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
-            bone_bgr = cv2.applyColorMap(gray, cv2.COLORMAP_BONE)
-            img = cv2.cvtColor(bone_bgr, cv2.COLOR_BGR2RGB)
+            new_bgr = cv2.applyColorMap(gray, return_color_map(option))
+            img = cv2.cvtColor(new_bgr, cv2.COLOR_BGR2RGB)
 
         self.img = img
         self.paint_base = self.img.copy()  
