@@ -1,4 +1,5 @@
 import sys
+from colormaps import opencv_colormaps
 import numpy as np
 import cv2
 from PySide6.QtWidgets import (
@@ -10,6 +11,15 @@ from PySide6.QtCore import Qt
 from pathlib import Path
 from PIL import Image
 from PIL.ImageQt import ImageQt
+
+def colormap_picker(name):
+
+    if name in opencv_colormaps:
+        return opencv_colormaps[name]
+    else:
+        return opencv_colormaps['RAINBOW']
+
+
 
 class Home(QWidget):
     def __init__(self):
@@ -45,7 +55,7 @@ class Home(QWidget):
 
             # Drop Down Menu Options
         self.drop_label = QLabel("Image Manipulation")
-        self.drop_down_list = ["Choose an option", "Size Up", "Shrink", "Crop", "Bone Color"]
+        self.drop_down_list = ["Choose an option", "Size Up", "Shrink", "Crop", "AUTUMN"]
         self.drop_combo_box = QComboBox()
         self.drop_combo_box.addItems(self.drop_down_list)
 
@@ -92,12 +102,12 @@ class Home(QWidget):
         option = self.drop_combo_box.currentText()
         img = self.img.copy()
 
-        if option == "Bone Color":
 
-            img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-            bone_bgr = cv2.applyColorMap(gray, cv2.COLORMAP_BONE)
-            img = cv2.cvtColor(bone_bgr, cv2.COLOR_BGR2RGB)
+
+        img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+        bgr = cv2.applyColorMap(gray, colormap_picker(option))
+        img = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
         self.img = img  
         self.show_image(self.img)
@@ -111,8 +121,12 @@ class Home(QWidget):
         self.preview_label.setPixmap(QPixmap.fromImage(qimg))
         self.preview_label.setVisible(True)
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Home()
     win.show()
     sys.exit(app.exec())
+
+
+
