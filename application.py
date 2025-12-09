@@ -1,6 +1,6 @@
 import sys
 from colormaps import opencv_colormaps
-from functions import return_color_map
+from functions import return_color_map, to_sepia, to_grayscale
 import numpy as np
 import cv2
 import requests
@@ -32,7 +32,7 @@ class DrawingLabel(QLabel):
 
     def set_allow_draw(self, allow: bool):
         self._allow_draw = allow
-        self._last_pos = None  
+        self._last_pos = None
 
     def set_scale(self, s: float):
         self._scale = max(1e-9, float(s))
@@ -107,9 +107,9 @@ class Home(QWidget):
 
         # brush states
         self.brush_enabled = False
-        self.brush_color_rgb = (255, 255, 255)  
-        self.brush_size = 8                     
-        self.paint_base: np.ndarray | None = None  
+        self.brush_color_rgb = (255, 255, 255)
+        self.brush_size = 8
+        self.paint_base: np.ndarray | None = None
 
         self.open_btn = QPushButton("Open")
         self.open_btn.clicked.connect(self.open_image)
@@ -143,7 +143,7 @@ class Home(QWidget):
         self.drop_down_list = ["Choose a filter", "Grayscale", "Sepia", "Invert"]
         for i in opencv_colormaps:
             self.drop_down_list.append(i)
-            
+
         self.drop_combo_box = QComboBox()
         self.drop_combo_box.addItems(self.drop_down_list)
 
@@ -179,7 +179,7 @@ class Home(QWidget):
             btn.setStyleSheet(f"background-color: rgb({rgb[0]},{rgb[1]},{rgb[2]});")
             btn.clicked.connect(lambda _, c=rgb: self.set_brush_color(c))
             self.color_btns.append(btn)
-            r, cidx = divmod(i, 3) 
+            r, cidx = divmod(i, 3)
             color_grid.addWidget(btn, r, cidx)
 
         self.clear_paint_btn = QPushButton("Clean up your damn mess")
@@ -262,7 +262,7 @@ class Home(QWidget):
     def clear_paint(self):
         if self.paint_base is not None:
             self.img = self.paint_base.copy()
-            self.show_image(self.img) 
+            self.show_image(self.img)
             self.status.setText("Cleaned up your mess brah.")
 
     def on_draw_line(self, x0: int, y0: int, x1: int, y1: int):
@@ -376,7 +376,7 @@ class Home(QWidget):
         self.zoom = max(self.zoom / 1.25, 0.0625)
         self.show_image(self.img)
 
-    # filters 
+    # filters
     def manipulate_image(self):
         if self.img is None:
             self.status.setText("Load an image first.")
@@ -389,33 +389,22 @@ class Home(QWidget):
 
         img = self.img.copy()
 
-        if option == "Grayscale":
-            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-            img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
-
-        elif option == "Invert":
-            img = 255 - img
-
-        elif option == "Sepia":
-            sepia_bgr_kernel = np.array([
-                [0.131, 0.534, 0.272],  
-                [0.168, 0.686, 0.349], 
-                [0.189, 0.769, 0.393],  
-            ], dtype=np.float32)
-            bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR).astype(np.float32)
-            sep = cv2.transform(bgr, sepia_bgr_kernel)
-            sep = np.clip(sep, 0, 255).astype(np.uint8)
-            img = cv2.cvtColor(sep, cv2.COLOR_BGR2RGB)
-
-        elif option == self.drop_combo_box.currentText():
-            bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
-            new_bgr = cv2.applyColorMap(gray, return_color_map(option))
-            img = cv2.cvtColor(new_bgr, cv2.COLOR_BGR2RGB)
+        match option:
+            case "Bone Color":
+                img = to_bone_color(img)
+            case "Grayscale":
+                # print("test")
+                img = to_grayscale(img)
+            case "Sepia":
+                # print("test")
+                img = to_sepia(img)
+            case _:
+                # Default no option picked
+                pass
 
         self.img = img
-        self.paint_base = self.img.copy()  
-        self.last_scale = 1.0            
+        self.paint_base = self.img.copy()
+        self.last_scale = 1.0
         self.show_image(self.img)
         self.status.setText(f"Applied filter: {option}")
 
@@ -465,7 +454,7 @@ class Home(QWidget):
             interp = cv2.INTER_CUBIC if upscaling else cv2.INTER_AREA
             resized = cv2.resize(self.img, (new_w, new_h), interpolation=interp)
             self.img = resized
-            self.paint_base = self.img.copy()  
+            self.paint_base = self.img.copy()
             self.last_scale = 1.0
             self.show_image(self.img)
             self.status.setText(f"Resized to {new_w}×{new_h}")
@@ -515,14 +504,14 @@ class Home(QWidget):
                 vw = max(1, self.scroll.viewport().width() - 20)
                 vh = max(1, self.scroll.viewport().height() - 20)
                 scale = min(vw / max(w, 1), vh / max(h, 1))
-                self.last_scale = scale  
+                self.last_scale = scale
 
         disp = base.scaled(
             int(w * scale), int(h * scale),
             Qt.KeepAspectRatio, Qt.SmoothTransformation
         )
         self.preview_label.setPixmap(disp)
-        self.preview_label.set_scale(scale)  
+        self.preview_label.set_scale(scale)
         self.preview_label.setVisible(True)
 
         zoom_pct = max(1, int(round(scale * 100)))
@@ -532,7 +521,7 @@ class Home(QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if not self.manual_zoom and self.img is not None:
-            self.last_scale = 1.0  
+            self.last_scale = 1.0
             self.show_image(self.img)
 
 
