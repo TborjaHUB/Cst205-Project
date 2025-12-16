@@ -1,5 +1,7 @@
 import cv2
 
+#Dictionary that contains OpenCV functions, easier to retrieve color maps
+
 opencv_colormaps = {
     "Autumn": cv2.COLORMAP_AUTUMN,
     "Bone": cv2.COLORMAP_BONE,
